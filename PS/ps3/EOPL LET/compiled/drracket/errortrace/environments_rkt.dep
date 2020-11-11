@@ -1,0 +1,1 @@
+("7.8" racket ("d03432e487756a25faa47e7ceab0b0faf6a7040f" . "a628f7db67e21f0377ba02231a336208db344ad7") #"/Users/moayedhajiali/Desktop/Courses/COMP 301/PS/ps3/EOPL LET/data-structures.rkt" (collects #"eopl" #"lang" #"reader.rkt") (collects #"eopl" #"main.rkt") (collects #"errortrace" #"errortrace-key.rkt"))

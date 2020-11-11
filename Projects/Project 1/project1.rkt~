@@ -1,0 +1,119 @@
+(module project1 mzscheme
+  ;;;;;;;;;;;; Comp 301 Project 1 ;;;;;;;;;;;;;;;;
+  ;;; Add group members below
+  ;;; Alpay Sabuncuoğlu, asabuncuoglu13, 0011221
+  ;;; Gül Sena Altıntaş, galtintas17, 0011222
+  ;;; save your file in the format: p1_0011221_asabuncuoglu13_00112222_galtintas17.rkt
+  ;;;;;;;;;;;;;;;;;;; PROBLEMS ;;;;;;;;;;;;;;;;;;;;
+  ;; PROJECT 1 Part A | Write your answer below here as a comment
+  ;
+  ;
+  ;
+  ;
+  ;
+  ;
+  ;
+  ;; PROJECT 1 Part B
+  ;; First Representation | We added a suffix so that both first and second representations can be tested at once.
+
+  (define CHARS "abcdefghijklmnopqrstuvwxyz")
+  (define CHARS-LEN 26)
+
+  (define reverse-list
+    (lambda (x)
+      (if(null? x)
+      '()
+      (append (reverse-list (cdr x)) (list (car x))))))
+  
+  (define get-num
+    (lambda (char index)
+      (cond
+        ((= index CHARS-LEN) 'non-alphabetic-character)
+        ((equal? char (string-ref CHARS index)) index)
+        (else (get-num char (+ index 1)))
+        )))
+  
+  (define get-ascii
+    (lambda (string index)
+     (if (< index (string-length string)) 
+     (cons (get-num (string-ref string index) 0) (get-ascii string (+ index 1)))
+     '()
+      )))
+  
+  (define create-a
+    (lambda (string)
+      (reverse-list (get-ascii string 0))
+      ))
+
+  (define is-zero-a?
+    (lambda (ascii-string) (null? ascii-string)))
+
+  (define next-char
+    (lambda (chars) (cadr chars)))
+  
+  (define this-entry
+    (lambda (x) (car x)))
+  (define next-entry
+    (lambda (x) (cdr x)))
+  
+  (define successor-helper
+    (lambda (string-ascii index)
+      (cond
+        ((null? string-ascii) (list 0))
+        ((= (this-entry string-ascii) 25) (cons 0 (successor-helper (next-entry string-ascii) (+ index 1))))
+        (else (cons (+ (this-entry string-ascii) 1) (next-entry string-ascii)))
+        )))
+  (define successor-a
+    (lambda (string-ascii)
+      (successor-helper string-ascii 0)
+      ))
+
+  (define a (create-a "zzzzzzz"))
+  (display a)
+  (display (successor-a a))
+
+  ;; Second Representation | We added a -b suffix so that both Unary and BigNum can be tested at once.
+  (define create-b
+    ())
+
+  (define is-zero-b?
+    ())
+
+  (define successor-b
+    ())
+
+  ;; PROJECT 1 Part C | Write your answer below here as a comment
+  ;
+  ;
+  ;
+  ;
+  ;
+  
+  ;;;;;;;;;;;;;;;;;;; TESTS ;;;;;;;;;;;;;;;;;;;;;;;;
+  ;;; Don't worry about the below function, we included it to test your implemented functions and display the result in the console
+  ;; As you implement your functions you can Run (the button on the top right corner) to test your implementations
+  (define-syntax equal??
+    (syntax-rules ()
+      ((_ test-exp correct-ans)
+       (let ((observed-ans test-exp))
+         (if (not (equal? observed-ans correct-ans))
+           (printf "Oops! ~s returned ~s, should have returned ~s~%" 'test-exp observed-ans correct-ans)
+           (printf "Correct! ~s => ~s~%" 'test-exp correct-ans))))))
+  
+  
+  ;; PROJECT 1 Part D | Remove the comments and write test cases.
+  (display "First Representation Tests\n")
+  ;(equal?? (create-a ) '()) ; should return ?
+  ;(equal?? (is-zero-a? '()) #f) ; should return #f
+  ;(equal?? (is-zero-a? '()) #t) ; should return #t
+  ;(equal?? (successor-a '()) '()) ; should return ?
+  (newline)
+
+  
+  (display "Second Representation Tests\n")
+  ;(equal?? (create-a ) '()) ; should return ?
+  ;(equal?? (is-zero-a? '()) #f) ; should return #f
+  ;(equal?? (is-zero-a? '()) #t) ; should return #t
+  ;(equal?? (successor-a '()) '()) ; should return ?
+  (newline)
+)
