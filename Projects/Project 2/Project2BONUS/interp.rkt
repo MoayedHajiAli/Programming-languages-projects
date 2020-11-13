@@ -8,7 +8,7 @@
 (require "data-structures.rkt")
 (require "environments.rkt")
 
-(provide value-of-program value-of build-ropes)
+(provide value-of-program value-of rope concat rope-ref)
 
 ;;;;;;;;;;;;;;;; the interpreter ;;;;;;;;;;;;;;;;
 
@@ -23,10 +23,10 @@
 
 
 ;;;;;;;;;;;;;;;ropes helper functions;;;;;;
-(define NODE_LEN 1)
+(define NODE_LEN 4)
 (define MX_LEN 4)
 
-(define (cont-ropes rope1 rope2)
+(define (concat rope1 rope2)
   ;; merge the content of two leafs into one leaf
   (define (merge-leafs leaf1 leaf2)
     (b-leaf (append (btree->chars leaf1) (btree->chars leaf2)) (+ (btree->len leaf1) (btree->len leaf2))))
@@ -50,22 +50,22 @@
     (else (b-parent rope1 rope2 (+ (btree->len rope1) (btree->len rope2))))))
 
 
-(define (build-ropes chars)
+(define (rope chars)
   (define (inner cur_lst chars)
     (cond
       ((eqv? chars '()) (b-leaf cur_lst (length cur_lst)))
       ((equal? NODE_LEN (length cur_lst))
        (let ((left (b-leaf cur_lst (length cur_lst)))
              (right (inner '() chars)))
-         (cont-ropes left right)))
+         (concat left right)))
       (else (inner (append cur_lst (list (car chars))) (cdr chars)))))
   (inner '() chars))
 
 
-(define (rope-ref rope ind)
-  (cases btree rope
+(define (rope-ref node ind)
+  (cases btree node
     (b-leaf (chars len)
-            (list-ref (btree->chars rope) ind))
+            (list-ref (btree->chars node) ind))
     (b-parent (left right len)
               (let ((left-len (btree->len left))
                     (right-len (btree->len right)))
@@ -73,9 +73,52 @@
                     (rope-ref right (- ind left-len))
                     (rope-ref left ind))))))
 
+(define (substr node start sub-len)
+  ;(display node)
+  ;(newline)
+  ;(display start)
+  ;(newline)
+  ;(display sub-len)
+  ;(newline)
+  ;(newline)
+  (define (chars-substr lst l r)
+   ; (display lst)
+   ; (display l)
+    ;(display r)
+    ;(newline)
+    (cond
+      ((>= l (length lst)) '())
+      ((> l r) '())
+      (else (cons (list-ref lst l) (chars-substr lst (+ l 1) r)))
+      ))
+  
+  (define (leaf-substr node l r)
+    (let ((chars (chars-substr (btree->chars node) l r 0)))
+      (b-leaf chars (length chars))
+      ))
+
+  (cases btree node
+    (b-leaf (chars len)
+            (if (>= (+ start sub-len) len)
+                (b-leaf (chars-substr chars start (+ start (- len 1))) len)
+                (b-leaf (chars-substr chars start (+ start (- sub-len 1))) sub-len)))
+    (b-parent (left right len)
+
+              (let ((left-rope (if (and (= start 0) (>= sub-len (btree->len left))) left (substr left start sub-len))))
+                (let ((right-rope (if (and (< start (btree->len left)) (>= (+ start sub-len) len))
+                                      right
+                                      (substr right (max (- start (btree->len left)) 0) (- sub-len (btree->len left-rope))))))
+                  (concat left-rope right-rope)
+                  )
+                ))
+    
+    ))
+
+;(define r (rope (list 1 2 3 4 5 6 7 8)))
+;(display (substr r 3 7))
 
 ;;test
-;(display (build-ropes '(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16)))
+;(display (rope '(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16)))
 
 
 ;#(struct:b-parent
@@ -136,14 +179,15 @@
                            (extend-env var val1 env))))
 
       ;;;;;; ropes behaviour implementation
-      (rope-const (chars) (build-ropes chars))
+      (rope-const (chars) (rope chars))
 
-      (cont-exp (exp1 exp2)
+      (concat-exp (exp1 exp2)
                 (let ((rope1 (value-of exp1 env))
                       (rope2 (value-of exp2 env)))
-                  (cont-ropes rope1 rope2)))
+                  (concat rope1 rope2)))
 
-      (sub-exp (exp1 l r) (1))
+      (substr-exp (exp1 l r) (substr exp1 l r))
+
       (rope-ref-exp(exp1 ind)
                    (let ((rope1 (value-of exp1 env)))
                      (rope-ref rope1 ind)))

@@ -48,11 +48,11 @@
 
     (expression
      ("concat" "(" expression "," expression ")")
-     cont-exp)
+     concat-exp)
 
     (expression
-     ("sub" "(" expression "," number "," number ")")
-     sub-exp)
+     ("substr" "(" expression "," number "," number ")")
+     substr-exp)
 
     (expression
      ("rope-ref" "(" expression "," number")")

@@ -82,9 +82,9 @@
  (check-shadowing-in-rhs "let x = 3 in let x = -(x,1) in x" 2)
  )
 (display (run "rope('h'e'l'l'o'w'o'r'l'd)"))
-(newline)
-(display (run "concat(rope('h'e'l), rope('l'o))"))
-(newline)
-(display (run "rope-ref(rope('h'e'l'l'o), 2)")) ;; 'l
-(newline)
-(display (run "rope-ref(concat(rope('m'o), concat(rope('a'y), rope('e'd))), 1)")) ;;'o
+;(newline)
+;(display (run "concat(rope('h'e'l), rope('l'o))"))
+;(newline)
+;(display (run "rope-ref(rope('h'e'l'l'o), 2)")) ;; 'l
+;(newline)
+;(display (run "rope-ref(concat(rope('m'o), concat(rope('a'y), rope('e'd))), 1)")) ;;'o
