@@ -55,47 +55,56 @@
   (b-parent
    (left btree?)
    (right btree?)
-   (len number?))
+   (len number?)
+   (depth number?))
   (b-leaf
    (chars list?)
-   (len number?)))
+   (len number?)
+   (depth number?)))
 
 
 ;; binary tree observers
 (define btree->left
   (lambda (v)
     (cases btree v
-      (b-parent (left right len) left)
+      (b-parent (left right len depth) left)
       (else (eopl:error "node is not a parent")))))
 
 (define btree->right
   (lambda (v)
     (cases btree v
-      (b-parent (left right len) right)
+      (b-parent (left right len depth) right)
       (else (eopl:error "node is not a parent")))))
 
 (define btree->len
   (lambda (v)
     (cases btree v
-      (b-parent (left right len) len)
-      (b-leaf (rope len) len)
+      (b-parent (left right len depth) len)
+      (b-leaf (rope len depth) len)
       (else (eopl:error "is not a node")))))
 
 (define btree->chars
   (lambda (v)
     (cases btree v
-      (b-leaf (chars len) chars)
+      (b-leaf (chars len depth) chars)
       (else (eopl:error "node is not a leaf")))))
+
+(define btree->depth
+  (lambda (v)
+    (cases btree v
+      (b-leaf (chars len depth) depth)
+      (b-parent (left right len depth) depth)
+      (else (eopl:error "not a node")))))
 
 ;;binary tree predicates
 (define (b-leaf? v)
   (cases btree v
-    (b-leaf (chars len) #t)
+    (b-leaf (chars len depth) #t)
     (else #f)))
 
 (define (b-parent? v)
   (cases btree v
-    (b-parent (left right len) #t)
+    (b-parent (left right len depth) #t)
     (else #f)))
 
 

@@ -29,7 +29,7 @@
 (define (concat rope1 rope2)
   ;; merge the content of two leafs into one leaf
   (define (merge-leafs leaf1 leaf2)
-    (b-leaf (append (btree->chars leaf1) (btree->chars leaf2)) (+ (btree->len leaf1) (btree->len leaf2))))
+    (b-leaf (append (btree->chars leaf1) (btree->chars leaf2)) (+ (btree->len leaf1) (btree->len leaf2)) 0))
     
   ;; check the case of mergining right child and right argument
   (define (left-case? rope1 rope2)
@@ -44,18 +44,22 @@
   ;; concatenate
   (cond
     ((left-case? rope1 rope2)
-     (b-parent (btree->left rope1) (merge-leafs (btree->right rope1) rope2) (+ (btree->len rope1) (btree->len rope2))))
+     (let ((left-rope (btree->left rope1))
+           (right-rope (merge-leafs (btree->right rope1) rope2)))
+     (b-parent left-rope right-rope (+ (btree->len left-rope) (btree->len right-rope)) (+ (max (btree->depth left-rope) (btree->depth right-rope)) 1))))
     ((right-case? rope1 rope2)
-     (b-parent (merge-leafs rope1 (btree->left rope2))  (btree->right rope2) (+ (btree->len rope1) (btree->len rope2))))
-    (else (b-parent rope1 rope2 (+ (btree->len rope1) (btree->len rope2))))))
+     (let ((left-rope (merge-leafs rope1 (btree->left rope2)))
+           (right-rope (btree->right rope2)))
+     (b-parent left-rope right-rope (+ (btree->len left-rope) (btree->len right-rope)) (+ (max (btree->depth left-rope) (btree->depth right-rope)) 1))))
+    (else (b-parent rope1 rope2 (+ (btree->len rope1) (btree->len rope2)) (+ (max (btree->depth rope1) (btree->depth rope2)) 1)))))
 
 
 (define (rope chars)
   (define (inner cur_lst chars)
     (cond
-      ((eqv? chars '()) (b-leaf cur_lst (length cur_lst)))
+      ((eqv? chars '()) (b-leaf cur_lst (length cur_lst) 0))
       ((equal? NODE_LEN (length cur_lst))
-       (let ((left (b-leaf cur_lst (length cur_lst)))
+       (let ((left (b-leaf cur_lst (length cur_lst) 0))
              (right (inner '() chars)))
          (concat left right)))
       (else (inner (append cur_lst (list (car chars))) (cdr chars)))))
@@ -64,9 +68,9 @@
 
 (define (rope-ref node ind)
   (cases btree node
-    (b-leaf (chars len)
+    (b-leaf (chars len depth)
             (list-ref (btree->chars node) ind))
-    (b-parent (left right len)
+    (b-parent (left right len depth)
               (let ((left-len (btree->len left))
                     (right-len (btree->len right)))
                 (if (>= ind left-len)
@@ -88,19 +92,24 @@
       ))
 
   (cases btree node
-    (b-leaf (chars len)
+    (b-leaf (chars len depth)
             (if (>= (+ start sub-len) len)
-                (b-leaf (chars-substr chars start (+ start (- len 1))) len)
-                (b-leaf (chars-substr chars start (+ start (- sub-len 1))) sub-len)))
-    (b-parent (left right len)
+                (b-leaf (chars-substr chars start (+ start (- len 1))) len 0)
+                (b-leaf (chars-substr chars start (+ start (- sub-len 1))) sub-len 0)))
+    (b-parent (left right len depth)
               (let ((left-rope (if (and (= start 0) (>= sub-len (btree->len left))) left (substr left start sub-len))))
                 (let ((right-rope (if (and (< start (btree->len left)) (>= (+ start sub-len) len))
                                       right
                                       (substr right (max (- start (btree->len left)) 0) (- sub-len (btree->len left-rope))))))
                   (concat left-rope right-rope)
                   )))
-    
     ))
+
+
+(define (fibonacci n)
+  (if (< n 2) 1 (+ (fibonacci (- n 1)) (fibonacci (- n 2)))))
+
+
 
 ;(define r (rope (list 1 2 3 4 5 6 7 8)))
 ;(display (substr r 3 7))
