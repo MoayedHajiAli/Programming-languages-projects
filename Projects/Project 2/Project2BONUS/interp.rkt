@@ -74,18 +74,8 @@
                     (rope-ref left ind))))))
 
 (define (substr node start sub-len)
-  ;(display node)
-  ;(newline)
-  ;(display start)
-  ;(newline)
-  ;(display sub-len)
-  ;(newline)
-  ;(newline)
+
   (define (chars-substr lst l r)
-   ; (display lst)
-   ; (display l)
-    ;(display r)
-    ;(newline)
     (cond
       ((>= l (length lst)) '())
       ((> l r) '())
@@ -103,14 +93,12 @@
                 (b-leaf (chars-substr chars start (+ start (- len 1))) len)
                 (b-leaf (chars-substr chars start (+ start (- sub-len 1))) sub-len)))
     (b-parent (left right len)
-
               (let ((left-rope (if (and (= start 0) (>= sub-len (btree->len left))) left (substr left start sub-len))))
                 (let ((right-rope (if (and (< start (btree->len left)) (>= (+ start sub-len) len))
                                       right
                                       (substr right (max (- start (btree->len left)) 0) (- sub-len (btree->len left-rope))))))
                   (concat left-rope right-rope)
-                  )
-                ))
+                  )))
     
     ))
 
