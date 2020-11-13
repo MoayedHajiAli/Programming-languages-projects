@@ -7,14 +7,26 @@
   ;;;;;;;;;;;;;;;;;;; PROBLEMS ;;;;;;;;;;;;;;;;;;;;
   ;; PROJECT 1 Part A | Write your answer below here as a comment
   ;
+  ; Our chosen quantity to represent is a string of alphabetical lowercase characters
   ;
+  ; Representation1:
+  ; we represent an alphabetical string of lowercase characters with a reversed list of the shifted value of th ascii of each character
+  ; The ascii shifted value assumed the character 'a' has zero ascii value.
   ;
+  ; ascii-rep = ()
+  ;	      = (Integer string-ascii) 
   ;
+  ; Representation2:
+  ; we represent an alphabetical string of lowercase characters with a reversed list of characters of the string
   ;
+  ; char-rep = ()
+  ;	     = (Character char-rep)
   ;
   ;
   ;; PROJECT 1 Part B
-   (define CHARS "abcdefghijklmnopqrstuvwxyz")
+  ;; First Representation | We added a suffix so that both first and second representations can be tested at once.
+
+  (define CHARS "abcdefghijklmnopqrstuvwxyz")
   (define CHARS-LEN 26)
 
   (define reverse-list
@@ -23,8 +35,6 @@
       '()
       (append (reverse-list (cdr x)) (list (car x))))))
   
-  ;; First Representation | We added a suffix so that both first and second representations can be tested at once.
-
   (define get-num
     (lambda (char index)
       (cond
@@ -68,11 +78,9 @@
       (successor-helper string-ascii 0)
       ))
 
-  (define a (create-a "zzzzzzz"))
-  (display a)
-  (display (successor-a a))
 
   ;; Second Representation | We added a -b suffix so that both Unary and BigNum can be tested at once.
+
   (define (create-b string)
     (define (create-b-helper string ind)
       (if (>= ind (string-length string))
@@ -85,9 +93,9 @@
 
   (define (char->ind char)
     (define (inner char ind)
-     (if (equal? char (string-ref CHARS ind))
-        ind
-        (inner char (+ ind 1))))
+      (if (equal? char (string-ref CHARS ind))
+          ind
+          (inner char (+ ind 1))))
     (inner char 0))
     
   (define (successor-b char-string)
@@ -98,12 +106,25 @@
        (let ((successor-ind (modulo (+ (char->ind (car char-string)) 1) CHARS-LEN)))
          (cons (string-ref CHARS successor-ind) (cdr char-string))))))
 
-  
   ;; PROJECT 1 Part C | Write your answer below here as a comment
-  ;Constructors: For a given set of data-types, construct a data-type A with the same value. Example of this would be create-a, create-b
-  ;Extractors: They extract a certain kind of information from a data-type. Example of this would be char-ind, get-ascii, get-num
-  ;Observers: 
-  ;Predicates: hava a signature of Datatype -> Boolean. It checks a certain condition, and returns #t, or #f accordingly. Example of this would be is-zero-a?, is-zero-b?, 
+  ;
+  ; Constructors: Part of the data type interface which builds elements of the data-type
+  ; Observers: Part of the data type interface which extracts information from values of the data-type
+  ; Extractors: Observers that extract portions of the data type value
+  ; Predicates: Observers that validate whether an expressions is a representation of certain data-type
+  ;
+  ;
+  ; create-a: constructor
+  ; is-zero-a?: observer-predicate
+  ; successor-a: constructor
+  ; create-b: constructor 
+  ; is-zero-b?: observer-predicate
+  ; successor-b: constructor
+  ;
+  ;
+  ;
+  ;
+  ;
   ;
   
   ;;;;;;;;;;;;;;;;;;; TESTS ;;;;;;;;;;;;;;;;;;;;;;;;
@@ -120,10 +141,10 @@
   
   ;; PROJECT 1 Part D | Remove the comments and write test cases.
   (display "First Representation Tests\n")
-  ;(equal?? (create-a ) '()) ; should return ?
-  ;(equal?? (is-zero-a? '()) #f) ; should return #f
-  ;(equal?? (is-zero-a? '()) #t) ; should return #t
-  ;(equal?? (successor-a '()) '()) ; should return ?
+  (equal?? (create-a "abcd") '(3 2 1 0)) ; should return ?
+  (equal?? (is-zero-a? '(0)) #f) ; should return #f
+  (equal?? (is-zero-a? '()) #t) ; should return #t
+  (equal?? (successor-a '(3 2 1 0)) '(4 2 1 0)) ; should return ?
   (newline)
 
   

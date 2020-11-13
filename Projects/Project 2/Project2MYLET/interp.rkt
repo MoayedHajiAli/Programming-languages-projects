@@ -58,5 +58,17 @@
                   ((equal? op 3) (num-val (/ (expval->num val1) (expval->num val2))))
                   (else (num-val (- (expval->num val1) (expval->num val2))))
                   )))
-        
+
+      (if-exp (condition exp conds exps last)
+              (cond
+                ((null? conds) (if (expval->bool (value-of condition env)) (value-of exp env) (value-of last env)))
+                ((equal? (expval->bool (value-of condition env)) #t) (value-of exp env))
+                (else (value-of (if-exp (car conds) (car exps) (cdr conds) (cdr exps) last) env))
+                )
+              )
+
+      (rev-exp (str)
+               (let ((s (expval->string (value-of str env))))
+                 (value-of (str-exp (list->string (reverse (string->list s)))) env)
+                 ))
       )))

@@ -40,7 +40,11 @@
     (expression
      ("op" "(" expression "," expression "," number ")")
      op-exp)
-     
+
+    (expression ("if" expression "then" expression (arbno "elif" expression "then" expression) "else" expression) if-exp)
+
+    (expression ("reverse" expression) rev-exp)
+    
     ))
 
 

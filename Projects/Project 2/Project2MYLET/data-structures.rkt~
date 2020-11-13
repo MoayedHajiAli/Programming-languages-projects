@@ -8,6 +8,8 @@
 
 ;;; an expressed value is either a number, a boolean or a procval.
 
+;; att str-exp to expressed values, add expval->string
+
 (define-datatype expval expval?
   (num-val
    (value number?))
