@@ -20,7 +20,7 @@
     (cond
       ((number? sloppy-val) (num-val sloppy-val))
       ((boolean? sloppy-val) (bool-val sloppy-val))
-      (else (build-ropes sloppy-val))
+      (else (rope sloppy-val))
             )))
 
 (define-syntax-rule (check-run (name str res) ...)
@@ -81,10 +81,77 @@
  (check-shadowing-in-body "let x = 3 in let x = 4 in x" 4)
  (check-shadowing-in-rhs "let x = 3 in let x = -(x,1) in x" 2)
  )
+
+;  TEST 1 building the rope out of list of chars where MX_LEN is 3
 (display (run "rope('h'e'l'l'o'w'o'r'l'd)"))
-;(newline)
-;(display (run "concat(rope('h'e'l), rope('l'o))"))
-;(newline)
-;(display (run "rope-ref(rope('h'e'l'l'o), 2)")) ;; 'l
-;(newline)
-;(display (run "rope-ref(concat(rope('m'o), concat(rope('a'y), rope('e'd))), 1)")) ;;'o
+;#(struct:b-parent
+;  #(struct:b-leaf ('h) 1 0)
+;  #(struct:b-parent
+;    #(struct:b-leaf ('e 'l 'l) 3 0)
+;    #(struct:b-parent
+;      #(struct:b-leaf ('o 'w 'o) 3 0)
+;      #(struct:b-leaf ('r 'l 'd) 3 0)
+;    6 1)
+;   9 2)
+; 10 3)
+(newline)
+
+; TEST 2 concatinating two strings
+(display (run "concat(rope('h'e'l'l'o), rope('w'o'r'l'd))"))
+;#(struct:b-parent
+;  #(struct:b-parent
+;    #(struct:b-leaf ('h 'e) 2 0)
+;    #(struct:b-leaf ('l 'l 'o) 3 0)
+;    5 1)
+;  #(struct:b-parent
+;    #(struct:b-leaf ('w 'o) 2 0)
+;    #(struct:b-leaf ('r 'l 'd) 3 0)
+;    5 1)
+;  10 2)
+(newline)
+; TEST 3 A more complicated example
+(display (run "concat(rope('h'e), concat(rope('l'l'o'w), rope('o'r'l'd)))"))
+;#(struct:b-parent
+;  #(struct:b-leaf ('h 'e) 2 0)
+;  #(struct:b-parent
+;    #(struct:b-parent
+;      #(struct:b-leaf ('l) 1 0)
+;      #(struct:b-leaf ('l 'o 'w) 3 0)
+;      4 1)
+;    #(struct:b-parent
+;      #(struct:b-leaf ('o) 1 0)
+;      #(struct:b-leaf ('r 'l 'd) 3 0)
+;      4 1)
+;    8 2)
+;  10 3)
+(newline)
+
+; TEST 4 fetching the third char from hello
+(display (run "rope-ref(rope('h'e'l'l'o), 2)")) ;; 'l
+(newline)
+
+; TEST 5 fething the 5th char from Moayed
+(display (run "rope-ref(concat(rope('M'o), concat(rope('a'y), rope('e'd))), 4)")) ;;'e
+(newline)
+
+;TEST 6 getting substring of length 6 starting from the second char which is "ellowo"
+(display (run "substr(rope('h'e'l'l'o'w'o'r'l'd), 1, 6)"))
+(newline)
+;#(struct:b-parent
+;  #(struct:b-leaf ('e 'l 'l) 3 0)
+;  #(struct:b-leaf ('o 'w 'o) 3 0)
+;  6 1)
+
+;TEST 7 getting substring of length 4 starting from the third char which is "llow"
+;this test case is different from 5 as no nodes can be taken as a whole. Refer to TEST1 for the structure of the helloworld rope
+(display (run "substr(rope('h'e'l'l'o'w'o'r'l'd), 2, 4)"))
+(newline)
+;#(struct:b-parent
+;  #(struct:b-leaf ('l 'l) 2 0)
+;  #(struct:b-leaf ('o 'w) 2 0)
+;  4 1)
+
+;TEST 8 getting substring of length 3 starting from the fourth char which is "low"
+;this test case demonstrate how short nodes are concatenated as explained in the paper
+(display (run "substr(rope('h'e'l'l'o'w'o'r'l'd), 3, 3)"))
+;#(struct:b-leaf ('l 'o 'w) 3 0)
