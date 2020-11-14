@@ -7,6 +7,7 @@
 (require "lang.rkt")
 (require "data-structures.rkt")
 (require "environments.rkt")
+(require rnrs/mutable-pairs-6)
 
 (provide value-of-program value-of rope concat rope-ref)
 
@@ -43,6 +44,8 @@
         #f))
   ;; concatenate
   (cond
+    ((b-empty? rope1) rope2)
+    ((b-empty? rope2) rope1)
     ((left-case? rope1 rope2)
      (let ((left-rope (btree->left rope1))
            (right-rope (merge-leafs (btree->right rope1) rope2)))
@@ -75,7 +78,9 @@
                     (right-len (btree->len right)))
                 (if (>= ind left-len)
                     (rope-ref right (- ind left-len))
-                    (rope-ref left ind))))))
+                    (rope-ref left ind))))
+    (b-empty '())
+    ))
 
 (define (substr node start sub-len)
 
@@ -103,16 +108,123 @@
                                       (substr right (max (- start (btree->len left)) 0) (- sub-len (btree->len left-rope))))))
                   (concat left-rope right-rope)
                   )))
+    (b-empty '())
     ))
+
 
 
 (define (fibonacci n)
   (if (< n 2) 1 (+ (fibonacci (- n 1)) (fibonacci (- n 2)))))
 
+(define (lower-fib val index)
+  (if (<= (fibonacci index) val) index (lower-fib val (+ index 1))))
+
+(define (get-leafs-as-list node)
+  (cases btree node
+    (b-leaf (chars len depth) (list node))
+    (b-parent (left right len depth) (append (get-leafs-as-list left) (get-leafs-as-list right)))
+    (b-empty '())))
+
+(define (list-with lst idx val k)
+  (cond
+    ((null? lst) '())
+    ((= k idx) (cons val (cdr lst)))
+    (else (cons (car lst) (list-with (cdr lst) idx val (+ k 1))))
+    )
+  )
+
+;(define l (list 1 2 3 4))
+;(display (list-with l 2 10 0))
+
+;(define (list-set! list k val)
+ ;   (if (zero? k)
+  ;      (set-car! list val)
+   ;     (list-set! (cdr list) (- k 1) val)))
+
+(define (rebalance node)
+
+  (define (finalize slots index collected)
+    ;(display slots)
+    ;(newline)
+    ;(display index)
+    ;(newline)
+    ;(display collected)
+    ;(newline)
+    ;(newline)
+    (cond
+      ((= index (length slots)) collected)
+      ((b-empty? (list-ref slots index)) (finalize slots (+ index 1) collected))
+      (else (finalize slots (+ index 1) (concat (list-ref slots index) collected))))
+    )
+
+  (define (attack leaf slots index collected)
+    ;(display leaf)
+    ;(newline)
+    ;(display slots)
+    ;(newline)
+    ;(display index)
+    ;(newline)
+    ;(display collected)
+    ;(newline)
+    ;(newline)
+    (let ((fib-val (fibonacci index)))
+
+      (cond
+        ((>= index (length slots)) slots)
+        ((> fib-val (btree->len leaf))
+         (if (b-empty? (list-ref slots index))
+             (attack leaf slots (+ index 1) collected)
+             (let ((node (list-ref slots index)))
+               (begin (set! slots (list-with slots index (b-empty) 0))
+                      (attack leaf slots (+ index 1) (concat node collected))
+                      ))))
+        ((<= fib-val (btree->len leaf))
+         
+         (let ((new-node (concat collected leaf)))
+           (if (b-empty? (list-ref slots index))
+               (if (b-empty? collected)
+                    (begin  (set! slots (list-with slots index leaf 0)) slots)
+                    (attack (concat collected leaf) slots 1 (b-empty)))
+
+                (if (b-empty? collected)
+                    (begin (set! slots (list-with slots index (concat node leaf) 0)) slots)
+                    (begin (set! slots (list-with slots index (b-empty) 0)) (attack (concat collected (concat node leaf)) slots 1 (b-empty)))
+                    )
+                )
+           )
+         )
+        )
+      )
+    )
+  
+  (define (process leafs slots)
+    (cond
+      ((null? leafs) (finalize slots 1 (b-empty)))
+      (else (set! slots (attack (car leafs) slots 1 (b-empty))) (process (cdr leafs) slots))
+      )
+    )
+
+  (define (empty-slots size)
+    (cond
+      ((= size 0) '())
+      (else (cons (b-empty) (empty-slots (- size 1)))))
+    )
+
+  (let ((leafs (get-leafs-as-list node))
+        (slots (empty-slots (+ (btree->depth node) 1))))
+    (process leafs slots)
+    )
+  )
 
 
-;(define r (rope (list 1 2 3 4 5 6 7 8)))
+(define r (rope (list 1 2 3 4 5 6 7 8)))
 ;(display (substr r 3 7))
+
+;(display (get-leafs-as-list r))
+;(newline)
+;(display (car (get-leafs-as-list r)))
+(define br (rebalance r))
+(display br)
 
 ;;test
 ;(display (rope '(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16)))

@@ -45,6 +45,38 @@
     (eopl:error 'expval-extractors "Looking for a ~s, found ~s"
                 variant value)))
 
+;;;;;;;;;;;;;;;;;; Rebalancing List ;;;;;;;;;;;;;;;;;;
+
+(define-datatype balancer balancer?
+  (slot
+   (index number?)
+   (min-fib number?)
+   (node btree?)
+   ))
+
+(define slot->index
+  (lambda (v)
+    (cases balancer v
+      (slot (index min-fib node) index)
+      (else (eopl:error "node is not balancer")))))
+
+(define slot->min-fib
+  (lambda (v)
+    (cases balancer v
+      (slot (index min-fib node) min-fib)
+      (else (eopl:error "node is not balancer")))))
+
+(define slot->node
+  (lambda (v)
+    (cases balancer v
+      (slot (index min-fib node) node)
+      (else (eopl:error "node is not balancer")))))
+
+
+(define (slot? v)
+  (cases balancer v
+    (slot (index min-fib node) #t)
+    (else #f)))
 
 ;;;;;;;;;;;;;;;;;::Binary tree;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -60,7 +92,9 @@
   (b-leaf
    (chars list?)
    (len number?)
-   (depth number?)))
+   (depth number?))
+  (b-empty)
+  )
 
 
 ;; binary tree observers
@@ -81,6 +115,7 @@
     (cases btree v
       (b-parent (left right len depth) len)
       (b-leaf (rope len depth) len)
+      (b-empty () 0)
       (else (eopl:error "is not a node")))))
 
 (define btree->chars
@@ -94,6 +129,7 @@
     (cases btree v
       (b-leaf (chars len depth) depth)
       (b-parent (left right len depth) depth)
+      (b-empty () 0)
       (else (eopl:error "not a node")))))
 
 ;;binary tree predicates
@@ -107,6 +143,11 @@
     (b-parent (left right len depth) #t)
     (else #f)))
 
+(define (b-empty? v)
+  (cases btree v
+    (b-empty () #t)
+    (else #f)
+    ))
 
 ;;tests
 ;(display (b-leaf? (b-leaf '(1, 2, 3) 3)))
