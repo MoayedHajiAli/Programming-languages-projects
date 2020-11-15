@@ -24,14 +24,25 @@
 
 
 ;;;;;;;;;;;;;;;ropes helper functions;;;;;;
-(define NODE_LEN 4)
-(define MX_LEN 4)
+
+;; initially how many chars to put in a single node
+(define NODE_LEN 1)
+
+;; Any leaf with less than MX_LEN length of chars will be considered as a short leaf
+(define MX_LEN 3)
 
 (define (concat rope1 rope2)
   ;; merge the content of two leafs into one leaf
   (define (merge-leafs leaf1 leaf2)
     (b-leaf (append (btree->chars leaf1) (btree->chars leaf2)) (+ (btree->len leaf1) (btree->len leaf2)) 0))
-    
+
+
+  ;; check the case of two short leaft to be merged into one leaf
+  (define (short_leafs? rope1 rope2)
+    (if (and (or (b-leaf? rope1) (b-empty? rope1)) (or (b-leaf? rope2) (b-empty? rope2)) (<= (+ (btree->len rope1) (btree->len rope2)) MX_LEN))
+        #t
+        #f))
+
   ;; check the case of mergining right child and right argument
   (define (left-case? rope1 rope2)
     (if (and (b-parent? rope1) (b-leaf? (btree->right rope1)) (b-leaf? rope2) (<= (+ (btree->len (btree->right rope1)) (btree->len rope2)) MX_LEN))
@@ -46,12 +57,14 @@
   (cond
     ((b-empty? rope1) rope2)
     ((b-empty? rope2) rope1)
+    ((short_leafs? rope1 rope2)
+     (merge-leafs rope1 rope2))
     ((left-case? rope1 rope2)
      (let ((left-rope (btree->left rope1))
-           (right-rope (merge-leafs (btree->right rope1) rope2)))
+           (right-rope (concat (btree->right rope1) rope2)))
      (b-parent left-rope right-rope (+ (btree->len left-rope) (btree->len right-rope)) (+ (max (btree->depth left-rope) (btree->depth right-rope)) 1))))
     ((right-case? rope1 rope2)
-     (let ((left-rope (merge-leafs rope1 (btree->left rope2)))
+     (let ((left-rope (concat rope1 (btree->left rope2)))
            (right-rope (btree->right rope2)))
      (b-parent left-rope right-rope (+ (btree->len left-rope) (btree->len right-rope)) (+ (max (btree->depth left-rope) (btree->depth right-rope)) 1))))
     (else (b-parent rope1 rope2 (+ (btree->len rope1) (btree->len rope2)) (+ (max (btree->depth rope1) (btree->depth rope2)) 1)))))
@@ -96,20 +109,22 @@
       (b-leaf chars (length chars))
       ))
 
-  (cases btree node
-    (b-leaf (chars len depth)
-            (if (>= (+ start sub-len) len)
-                (b-leaf (chars-substr chars start (+ start (- len 1))) len 0)
-                (b-leaf (chars-substr chars start (+ start (- sub-len 1))) sub-len 0)))
-    (b-parent (left right len depth)
-              (let ((left-rope (if (and (= start 0) (>= sub-len (btree->len left))) left (substr left start sub-len))))
-                (let ((right-rope (if (and (< start (btree->len left)) (>= (+ start sub-len) len))
-                                      right
-                                      (substr right (max (- start (btree->len left)) 0) (- sub-len (btree->len left-rope))))))
-                  (concat left-rope right-rope)
-                  )))
-    (b-empty '())
-    ))
+   (if (>= start (btree->len node))
+      (b-empty)
+      (cases btree node
+        (b-leaf (chars len depth)
+                (if (> (+ start sub-len) len)
+                    (b-leaf (chars-substr chars start (- len 1)) (- len start) 0)
+                    (b-leaf (chars-substr chars start (+ start (- sub-len 1))) sub-len 0)))
+        (b-parent (left right len depth)
+                  (let ((left-rope (if (and (= start 0) (>= sub-len (btree->len left))) left (substr left start (min sub-len ( - (btree->len left) 1))))))
+                    (let ((right-rope (if (and (< start (btree->len left)) (>= (+ start sub-len) len))
+                                          right
+                                          (substr right (max (- start (btree->len left)) 0) (- sub-len (btree->len left-rope))))))
+                      (concat left-rope right-rope)
+                      )))
+        (b-empty '())
+        )))
 
 
 

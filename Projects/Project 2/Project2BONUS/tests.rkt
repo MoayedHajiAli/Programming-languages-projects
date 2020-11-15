@@ -82,6 +82,7 @@
  (check-shadowing-in-rhs "let x = 3 in let x = -(x,1) in x" 2)
  )
 
+; the ropes is stored in a binary tree where each node is either a leaf or a parant, and each node has a certain depth, and len which represents the length of the ropes in its sub-tree
 ;  TEST 1 building the rope out of list of chars where MX_LEN is 3
 (display (run "rope('h'e'l'l'o'w'o'r'l'd)"))
 ;#(struct:b-parent
@@ -154,25 +155,32 @@
 ;TEST 8 getting substring of length 3 starting from the fourth char which is "low"
 ;this test case demonstrate how short nodes are concatenated as explained in the paper
 (display (run "substr(rope('h'e'l'l'o'w'o'r'l'd), 3, 3)"))
+(newline)
 ;#(struct:b-leaf ('l 'o 'w) 3 0)
 
-;TEST 9 testing the rebalance function, given a rope of structure:
+;TEST 9 construct rope for a long list of char (abcdefghijk). We can see the construction results in a deep tree (or depth 3) which will be rebalanced in TEST 10
+(display (run "rope('a'b'c'd'e'f'g'h'i'j'k)"))
+(newline)
 ;#(struct:b-parent
 ;  #(struct:b-leaf ('a 'b) 2 0)
 ;  #(struct:b-parent
 ;    #(struct:b-leaf ('c 'd 'e) 3 0)
 ;    #(struct:b-parent
 ;      #(struct:b-leaf ('f 'g 'h) 3 0)
-;      #(struct:b-leaf ('i 'j 'k) 3 0) 6 1) 9 2) 11 3)
+;      #(struct:b-leaf ('i 'j 'k) 3 0)
+;      6 1)
+;    9 2)
+;  11 3)
 ; the rebalance operation rebalances the rope according to the rebalance algorithm described in the paper
-(newline)
-(display (run "rebalance(concat(rope('a'b), concat(rope('c'd'e), concat(rope('f'g'h), rope('i'j'k)))))"))
 
-; correct output
+;TEST 10 rebalancing the rope in TEST 9. we can see that the depth of the tree was reduced by one.
+(display (run "rebalance(rope('a'b'c'd'e'f'g'h'i'j'k))"))
 ;#(struct:b-parent
 ;  #(struct:b-parent
 ;    #(struct:b-leaf ('a 'b) 2 0)
 ;    #(struct:b-leaf ('c 'd 'e) 3 0) 5 1)
 ;  #(struct:b-parent
 ;    #(struct:b-leaf ('f 'g 'h) 3 0)
-;    #(struct:b-leaf ('i 'j 'k) 3 0) 6 1) 11 2)
+;    #(struct:b-leaf ('i 'j 'k) 3 0)
+;    6 1)
+;  11 2)
