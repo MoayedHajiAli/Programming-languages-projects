@@ -155,3 +155,24 @@
 ;this test case demonstrate how short nodes are concatenated as explained in the paper
 (display (run "substr(rope('h'e'l'l'o'w'o'r'l'd), 3, 3)"))
 ;#(struct:b-leaf ('l 'o 'w) 3 0)
+
+;TEST 9 testing the rebalance function, given a rope of structure:
+;#(struct:b-parent
+;  #(struct:b-leaf ('a 'b) 2 0)
+;  #(struct:b-parent
+;    #(struct:b-leaf ('c 'd 'e) 3 0)
+;    #(struct:b-parent
+;      #(struct:b-leaf ('f 'g 'h) 3 0)
+;      #(struct:b-leaf ('i 'j 'k) 3 0) 6 1) 9 2) 11 3)
+; the rebalance operation rebalances the rope according to the rebalance algorithm described in the paper
+(newline)
+(display (run "rebalance(concat(rope('a'b), concat(rope('c'd'e), concat(rope('f'g'h), rope('i'j'k)))))"))
+
+; correct output
+;#(struct:b-parent
+;  #(struct:b-parent
+;    #(struct:b-leaf ('a 'b) 2 0)
+;    #(struct:b-leaf ('c 'd 'e) 3 0) 5 1)
+;  #(struct:b-parent
+;    #(struct:b-leaf ('f 'g 'h) 3 0)
+;    #(struct:b-leaf ('i 'j 'k) 3 0) 6 1) 11 2)

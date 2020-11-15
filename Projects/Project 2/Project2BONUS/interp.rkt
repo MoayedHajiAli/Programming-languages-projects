@@ -24,24 +24,14 @@
 
 
 ;;;;;;;;;;;;;;;ropes helper functions;;;;;;
-
-;; initially how many chars to put in a single node
-(define NODE_LEN 1)
-
-;; Any leaf with less than MX_LEN length of chars will be considered as a short leaf
-(define MX_LEN 3)
+(define NODE_LEN 4)
+(define MX_LEN 4)
 
 (define (concat rope1 rope2)
   ;; merge the content of two leafs into one leaf
   (define (merge-leafs leaf1 leaf2)
     (b-leaf (append (btree->chars leaf1) (btree->chars leaf2)) (+ (btree->len leaf1) (btree->len leaf2)) 0))
-
-  ;; check the case of two short leaft to be merged into one leaf
-  (define (short_leafs? rope1 rope2)
-    (if (and (or (b-leaf? rope1) (b-empty? rope1)) (or (b-leaf? rope2) (b-empty? rope2)) (<= (+ (btree->len rope1) (btree->len rope2)) MX_LEN))
-        #t
-        #f))
-  
+    
   ;; check the case of mergining right child and right argument
   (define (left-case? rope1 rope2)
     (if (and (b-parent? rope1) (b-leaf? (btree->right rope1)) (b-leaf? rope2) (<= (+ (btree->len (btree->right rope1)) (btree->len rope2)) MX_LEN))
@@ -56,14 +46,12 @@
   (cond
     ((b-empty? rope1) rope2)
     ((b-empty? rope2) rope1)
-    ((short_leafs? rope1 rope2)
-     (merge-leafs rope1 rope2))
     ((left-case? rope1 rope2)
      (let ((left-rope (btree->left rope1))
-           (right-rope (concat (btree->right rope1) rope2)))
+           (right-rope (merge-leafs (btree->right rope1) rope2)))
      (b-parent left-rope right-rope (+ (btree->len left-rope) (btree->len right-rope)) (+ (max (btree->depth left-rope) (btree->depth right-rope)) 1))))
     ((right-case? rope1 rope2)
-     (let ((left-rope (concat rope1 (btree->left rope2)))
+     (let ((left-rope (merge-leafs rope1 (btree->left rope2)))
            (right-rope (btree->right rope2)))
      (b-parent left-rope right-rope (+ (btree->len left-rope) (btree->len right-rope)) (+ (max (btree->depth left-rope) (btree->depth right-rope)) 1))))
     (else (b-parent rope1 rope2 (+ (btree->len rope1) (btree->len rope2)) (+ (max (btree->depth rope1) (btree->depth rope2)) 1)))))
@@ -95,7 +83,7 @@
     ))
 
 (define (substr node start sub-len)
-  
+
   (define (chars-substr lst l r)
     (cond
       ((>= l (length lst)) '())
@@ -107,22 +95,21 @@
     (let ((chars (chars-substr (btree->chars node) l r 0)))
       (b-leaf chars (length chars))
       ))
-  (if (>= start (btree->len node))
-      (b-empty)
-      (cases btree node
-        (b-leaf (chars len depth)
-                (if (> (+ start sub-len) len)
-                    (b-leaf (chars-substr chars start (- len 1)) (- len start) 0)
-                    (b-leaf (chars-substr chars start (+ start (- sub-len 1))) sub-len 0)))
-        (b-parent (left right len depth)
-                  (let ((left-rope (if (and (= start 0) (>= sub-len (btree->len left))) left (substr left start (min sub-len ( - (btree->len left) 1))))))
-                    (let ((right-rope (if (and (< start (btree->len left)) (>= (+ start sub-len) len))
-                                          right
-                                          (substr right (max (- start (btree->len left)) 0) (- sub-len (btree->len left-rope))))))
-                      (concat left-rope right-rope)
-                      )))
-        (b-empty '())
-        )))
+
+  (cases btree node
+    (b-leaf (chars len depth)
+            (if (>= (+ start sub-len) len)
+                (b-leaf (chars-substr chars start (+ start (- len 1))) len 0)
+                (b-leaf (chars-substr chars start (+ start (- sub-len 1))) sub-len 0)))
+    (b-parent (left right len depth)
+              (let ((left-rope (if (and (= start 0) (>= sub-len (btree->len left))) left (substr left start sub-len))))
+                (let ((right-rope (if (and (< start (btree->len left)) (>= (+ start sub-len) len))
+                                      right
+                                      (substr right (max (- start (btree->len left)) 0) (- sub-len (btree->len left-rope))))))
+                  (concat left-rope right-rope)
+                  )))
+    (b-empty '())
+    ))
 
 
 
@@ -146,66 +133,26 @@
     )
   )
 
-;(define l (list 1 2 3 4))
-;(display (list-with l 2 10 0))
-
-;(define (list-set! list k val)
- ;   (if (zero? k)
-  ;      (set-car! list val)
-   ;     (list-set! (cdr list) (- k 1) val)))
-
 (define (rebalance node)
 
   (define (finalize slots index collected)
-    ;(display slots)
-    ;(newline)
-    ;(display index)
-    ;(newline)
-    ;(display collected)
-    ;(newline)
-    ;(newline)
     (cond
       ((= index (length slots)) collected)
       ((b-empty? (list-ref slots index)) (finalize slots (+ index 1) collected))
-      (else (finalize slots (+ index 1) (concat (list-ref slots index) collected))))
-    )
+      (else (finalize slots (+ index 1) (concat (list-ref slots index) collected)))))
 
   (define (attack leaf slots index collected)
-    ;(display leaf)
-    ;(newline)
-    ;(display slots)
-    ;(newline)
-    ;(display index)
-    ;(newline)
-    ;(display collected)
-    ;(newline)
-    ;(newline)
-    (let ((fib-val (fibonacci index)))
-
+    (let ((fib-val (fibonacci (+ index 1))))
       (cond
         ((>= index (length slots)) slots)
-        ((> fib-val (btree->len leaf))
-         (if (b-empty? (list-ref slots index))
-             (attack leaf slots (+ index 1) collected)
-             (let ((node (list-ref slots index)))
-               (begin (set! slots (list-with slots index (b-empty) 0))
-                      (attack leaf slots (+ index 1) (concat node collected))
-                      ))))
         ((<= fib-val (btree->len leaf))
-         
-         (let ((new-node (concat collected leaf)))
-           (if (b-empty? (list-ref slots index))
-               (if (b-empty? collected)
-                    (begin  (set! slots (list-with slots index leaf 0)) slots)
-                    (attack (concat collected leaf) slots 1 (b-empty)))
-
-                (if (b-empty? collected)
-                    (begin (set! slots (list-with slots index (concat node leaf) 0)) slots)
-                    (begin (set! slots (list-with slots index (b-empty) 0)) (attack (concat collected (concat node leaf)) slots 1 (b-empty)))
-                    )
-                )
-           )
-         )
+         (let ((node (list-ref slots index)))
+           (attack leaf (list-with slots index (b-empty) 0) (+ index 1) (concat node collected))))
+        ((> fib-val (btree->len leaf))
+         (let ((new-node (concat (concat (list-ref slots index) collected) leaf)))
+           (if (> fib-val (btree->len new-node))
+               (list-with slots index new-node 0)
+               (attack new-node (list-with slots index (b-empty) 0) 1 (b-empty)))))
         )
       )
     )
@@ -213,52 +160,17 @@
   (define (process leafs slots)
     (cond
       ((null? leafs) (finalize slots 1 (b-empty)))
-      (else (set! slots (attack (car leafs) slots 1 (b-empty))) (process (cdr leafs) slots))
-      )
-    )
+      (else (process (cdr leafs) (attack (car leafs) slots 1 (b-empty))))))
 
   (define (empty-slots size)
     (cond
       ((= size 0) '())
-      (else (cons (b-empty) (empty-slots (- size 1)))))
-    )
+      (else (cons (b-empty) (empty-slots (- size 1))))))
 
   (let ((leafs (get-leafs-as-list node))
-        (slots (empty-slots (+ (btree->depth node) 1))))
-    (process leafs slots)
-    )
+        (slots (empty-slots (+ (btree->len node) 1))))
+    (process leafs slots))
   )
-
-
-;(define r (rope (list 1 2 3 4 5 6)))
-;(display r)
-;(newline)
-;(display (substr r 1 4))
-
-;(display (get-leafs-as-list r))
-;(newline)
-;(display (car (get-leafs-as-list r)))
-;(define br (rebalance r))
-;(newline)
-;(display br)
-
-;;test
-;(display (rope '(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16)))
-
-
-;#(struct:b-parent
-;  #(struct:b-leaf ((1) (,2) ,3) 3)
-;  #(struct:b-parent
-;    #(struct:b-leaf ((,4) (,5) (,6) ,7) 4)
-;    #(struct:b-parent
-;      #(struct:b-leaf ((,8) (,9) (,10) ,11) 4)
-;      #(struct:b-parent
-;        #(struct:b-leaf ((,12) (,13) (,14) ,15) 4)
-;        #(struct:b-leaf (,16) 1)
-;        5)
-;     9)
-;   13)
-; 16)
 
 ;;
 ;; value-of : Exp * Env -> ExpVal
@@ -312,6 +224,8 @@
                   (concat rope1 rope2)))
 
       (substr-exp (exp1 l r) (substr (value-of exp1 env) l r))
+
+      (rebalance-exp (node) (rebalance (value-of node env)))
 
       (rope-ref-exp(exp1 ind)
                    (let ((rope1 (value-of exp1 env)))

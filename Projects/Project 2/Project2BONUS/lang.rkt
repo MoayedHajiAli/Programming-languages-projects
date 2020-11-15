@@ -58,6 +58,8 @@
      ("rope-ref" "(" expression "," number")")
  
      rope-ref-exp)
+
+    (expression ("rebalance" "(" expression ")") rebalance-exp)
     ))
 
 ;;;;;;;;;;;;;;;; sllgen boilerplate ;;;;;;;;;;;;;;;;
