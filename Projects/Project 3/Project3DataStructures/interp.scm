@@ -18,6 +18,15 @@
   ;; say (instrument-let #t) to turn instrumentation on.
   ;;     (instrument-let #f) to turn it off again.
 
+
+;;;;;;;;;;;;;;;; Helper Methods ;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define (create-array length value)
+  (if (= length 0)
+      '()
+      (cons (newref value) (create-array (- length 1) value)))
+  )
+
 ;;;;;;;;;;;;;;;; the interpreter ;;;;;;;;;;;;;;;;
 
   ;; value-of-program : Program -> ExpVal
@@ -108,6 +117,31 @@
               (begin
                 (setref! ref v2)
                 (num-val 23)))))
+
+        (newarr-exp (exp1 exp2)
+                    (arr-val (list-arr (create-array (expval->num (value-of exp1 env)) (value-of exp2 env)))))
+        
+        (updatearr-exp (exp1 exp2 exp3)
+                       (let ((array (expval->arr (value-of exp1 env)))
+                             (index (expval->num (value-of exp2 env)))
+                             )
+                         (cases arrval array
+                           (list-arr (lst)
+                                     (value-of (setref-exp ((list-ref lst index) exp3)) env)))
+                         )
+                       )
+
+
+        (readarr-exp (exp1 exp2)
+                     (let ((array (expval->arr (value-of exp1 env)))
+                           (index (expval->num (value-of exp2 env)))
+                           )
+                       (cases arrval array
+                         (list-arr (lst)
+                                   (value-of (deref-exp (ref-val (list-ref lst index))) env)))
+                       )
+                     )
+        
         )))
 
   ;; apply-procedure : Proc * ExpVal -> ExpVal

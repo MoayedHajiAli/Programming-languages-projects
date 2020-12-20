@@ -10,6 +10,11 @@
 ;;; an expressed value is either a number, a boolean, a procval, or a
 ;;; reference. 
 
+  (define-datatype arrval arrval?
+    (list-arr
+     (lst (list-of reference?))
+    ))
+  
   (define-datatype expval expval?
     (num-val
       (value number?))
@@ -19,10 +24,19 @@
       (proc proc?))
     (ref-val
       (ref reference?))
+    (arr-val
+     (arr arrval?))
     )
 
 ;;; extractors:
 
+  (define expval->arr
+    (lambda (v)
+      (cases expval v
+        (arr-val (arr) arr)
+        (else (expval-extractor-error 'arr v))
+        )))
+  
   (define expval->num
     (lambda (v)
       (cases expval v

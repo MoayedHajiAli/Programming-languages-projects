@@ -73,15 +73,15 @@
         setref-exp)
 
       (expression
-       ("newarray" "(" expression "," expression ")") new-arr-exp)
+       ("newarray" "(" expression "," expression ")") newarr-exp)
 
       (expression
        ("update-array" "(" expression "," expression "," expression ")")
-       update-arr-exp)
+       updatearr-exp)
       
       (expression
         ("read-array" "(" expression "," expression ")")
-        read-arr-exp)
+        readarr-exp)
 
      
       ))
