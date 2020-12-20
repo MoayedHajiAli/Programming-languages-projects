@@ -1,1 +1,4 @@
 *.rkt~
+Projects/Project 3/Project3DataStructures/compiled/
+*.dep
+*.zo
