@@ -72,18 +72,6 @@
         ("setref" "(" expression "," expression ")")
         setref-exp)
 
-      (expression
-       ("newarray" "(" expression "," expression ")") new-arr-exp)
-
-      (expression
-       ("update-array" "(" expression "," expression "," expression ")")
-       update-arr-exp)
-      
-      (expression
-        ("read-array" "(" expression "," expression ")")
-        read-arr-exp)
-
-     
       ))
 
   ;;;;;;;;;;;;;;;; sllgen boilerplate ;;;;;;;;;;;;;;;;
