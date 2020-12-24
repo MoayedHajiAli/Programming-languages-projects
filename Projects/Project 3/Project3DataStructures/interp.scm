@@ -21,11 +21,70 @@
 
 ;;;;;;;;;;;;;;;; Helper Methods ;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define (create-array length value)
-  (if (= length 0)
-      '()
-      (cons (newref value) (create-array (- length 1) value)))
-  )
+  (define INIT-SIZE 1010)
+  (define EMPTY-VAL -1)
+  
+  (define (create-array length value)
+    (if (= length 0)
+        '()
+        (cons (newref value) (create-array (- length 1) value)))
+    )
+
+  (define (get-first-nonempty arr)
+    (define (iterate lst)
+      (cond
+        ((null? lst) 0)
+        ((= -1 (expval->num (deref (car lst)))) (+ 1 (iterate (cdr lst))))
+        (else 0)
+        )
+      )
+    (cases arrval arr
+      (list-arr (lst) (iterate lst))
+      )
+    )
+
+  (define (get-last-nonempty arr)
+
+    (define (iterate lst index answer)
+      (cond
+        ((null? lst) answer)
+        ((= EMPTY-VAL (expval->num (deref (car lst))) ) (iterate (cdr lst) (+ index 1) answer))
+        (else (iterate (cdr lst) (+ index 1) index))
+        )
+      )
+    (cases arrval arr
+      (list-arr (lst) (iterate lst  0 EMPTY-VAL))
+      )
+    )
+
+  (define (array-print arr)
+    (define (iterate lst)
+      (cond
+        ((null? lst) (newline) (num-val 23))
+        ((= EMPTY-VAL (expval->num (deref (car lst)))) (iterate (cdr lst)))
+        (else (display (deref (car lst))) (iterate (cdr lst)))))
+    (cases arrval arr
+      (list-arr (lst) (iterate lst))
+      )
+    )
+  
+  (define (get-size arr)  
+    (let ((l (get-first-nonempty arr))
+          (r (get-last-nonempty arr)))
+      (if (= r -1) 0 (- (+ r 1) l))
+      )
+    )
+
+  (define (update-array arr index value)
+    (cases arrval arr
+      (list-arr (lst)
+                (setref! (list-ref lst index) value)))
+    )
+
+  (define (read-array arr index)
+    (cases arrval arr
+      (list-arr (lst) (deref (list-ref lst index))))
+    )
 
 ;;;;;;;;;;;;;;;; the interpreter ;;;;;;;;;;;;;;;;
 
@@ -124,23 +183,104 @@
         (updatearr-exp (exp1 exp2 exp3)
                        (let ((array (expval->arr (value-of exp1 env)))
                              (index (expval->num (value-of exp2 env)))
+                             (value (value-of exp3 env))
                              )
-                         (cases arrval array
-                           (list-arr (lst)
-                                     (value-of (setref-exp ((list-ref lst index) exp3)) env)))
+                         (update-array array index value)
                          )
                        )
-
 
         (readarr-exp (exp1 exp2)
                      (let ((array (expval->arr (value-of exp1 env)))
                            (index (expval->num (value-of exp2 env)))
                            )
-                       (cases arrval array
-                         (list-arr (lst)
-                                   (value-of (deref-exp (ref-val (list-ref lst index))) env)))
+                       (read-array array index)
+                     ))
+
+        (new-stack-exp ()
+                       (arr-val (list-arr (create-array INIT-SIZE (num-val EMPTY-VAL))))
                        )
-                     )
+        
+        (push-stack-exp (exp1 exp2)
+                        (let ((arr (expval->arr (value-of exp1 env)))
+                              (val (value-of exp2 env)))
+                          (update-array arr (+ 1 (get-last-nonempty arr)) val)
+                          (num-val 23)
+                          )
+                        )
+        (pop-stack-exp (exp1)
+                       (let ((arr (expval->arr (value-of exp1 env))))
+                         (let ((val (read-array arr (get-last-nonempty arr))))
+                           (update-array arr (get-last-nonempty arr) (num-val EMPTY-VAL))
+                           val
+                         )
+                       ))
+
+
+        (top-stack-exp (exp1)
+                       (let ((arr (expval->arr (value-of exp1 env))))
+                         (let ((val (read-array arr (get-last-nonempty arr))))
+                           val
+                         )
+                       ))
+        
+        (empty-stack-exp (exp)
+                         (let ((size (get-size (expval->arr (value-of exp env)))))
+                           (bool-val (eq? size 0))
+                           ))
+
+        (size-stack-exp (exp1)
+                        (let ((arr (expval->arr (value-of exp1 env))))
+                          (num-val (get-size arr))
+                          )
+                        )
+
+        (print-stack-exp (exp1)
+                         (array-print (expval->arr (value-of exp1 env)))
+                         )
+
+
+        
+        (new-queue-exp ()
+                       (arr-val (list-arr (create-array INIT-SIZE (num-val EMPTY-VAL))))
+                       )
+        
+        (push-queue-exp (exp1 exp2)
+                        (let ((arr (expval->arr (value-of exp1 env)))
+                              (val (value-of exp2 env)))
+                          (update-array arr (+ 1 (get-last-nonempty arr)) val)
+                          (num-val 23)
+                          )
+                        )
+        (pop-queue-exp (exp1)
+                       (let ((arr (expval->arr (value-of exp1 env))))
+                         (let ((val (read-array arr (get-first-nonempty arr))))
+                           (update-array arr (get-first-nonempty arr) (num-val EMPTY-VAL))
+                           val
+                         )
+                       ))
+
+
+        (top-queue-exp (exp1)
+                       (let ((arr (expval->arr (value-of exp1 env))))
+                         (let ((val (read-array arr (get-first-nonempty arr))))
+                           val
+                         )
+                       ))
+        
+        (empty-queue-exp (exp)
+                         (let ((size (get-size (expval->arr (value-of exp env)))))
+                           (bool-val (eq? size 0))
+                           ))
+
+        (size-queue-exp (exp1)
+                        (let ((arr (expval->arr (value-of exp1 env))))
+                          (num-val (get-size arr))
+                          )
+                        )
+
+        (print-queue-exp (exp1)
+                         (array-print (expval->arr (value-of exp1 env)))
+                         )
         
         )))
 

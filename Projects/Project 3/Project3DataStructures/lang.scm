@@ -83,7 +83,63 @@
         ("read-array" "(" expression "," expression ")")
         readarr-exp)
 
-     
+      (expression
+        ("newstack" "(" ")")
+        new-stack-exp)
+
+      (expression
+       ("stack-push" "(" expression  "," expression ")")
+       push-stack-exp)
+
+      (expression
+       ("stack-pop" "(" expression ")")
+       pop-stack-exp)
+
+      (expression
+       ("stack-size" "(" expression ")")
+       size-stack-exp)
+
+      (expression
+       ("stack-top" "(" expression ")")
+       top-stack-exp)
+
+      (expression
+       ("empty-stack?" "(" expression ")")
+       empty-stack-exp)
+
+      (expression
+       ("print-stack" "(" expression ")")
+       print-stack-exp)
+
+      (expression
+        ("newqueue" "(" ")")
+        new-queue-exp)
+
+      (expression
+       ("queue-push" "(" expression  "," expression ")")
+       push-queue-exp)
+
+      (expression
+       ("queue-pop" "(" expression ")")
+       pop-queue-exp)
+
+      (expression
+       ("queue-size" "(" expression ")")
+       size-queue-exp)
+
+      (expression
+       ("queue-top" "(" expression ")")
+       top-queue-exp)
+
+      (expression
+       ("empty-queue?" "(" expression ")")
+       empty-queue-exp)
+
+      (expression
+       ("print-queue" "(" expression ")")
+       print-queue-exp)
+      
+      
       ))
 
   ;;;;;;;;;;;;;;;; sllgen boilerplate ;;;;;;;;;;;;;;;;
