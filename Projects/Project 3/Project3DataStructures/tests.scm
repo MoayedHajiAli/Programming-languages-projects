@@ -191,10 +191,12 @@ in begin
 ;            ; ==================== Stack test cases =========================;
 
 
+      ;; aditional test cases
       (stack-test0 "let x = newstack() in begin stack-push(x, 10); stack-push(x, 20); stack-push(x,30); stack-pop(x) ; stack-pop(x) ; stack-top(x) end" 10)
       (stack-test01 "let x = newstack() in begin stack-push(x, 10); stack-push(x, 20); stack-push(x,30); stack-pop(x) ; stack-pop(x); empty-stack?(x) end" #f)
       (stack-test02 "let x = newstack() in begin stack-push(x, 10); stack-push(x, 20); stack-push(x,30); stack-push(x, 40); stack-size(x) end" 4)
-      (stack-test03 "let x = newstack() in begin stack-push(x, 10); stack-push(x, 20); stack-push(x,30); stack-push(x, 40); print-stack(x) end" 23)
+      (stack-test03 "let x = newstack() in begin stack-push(x, 10); stack-push(x, 20); stack-push(x,30); stack-push(x, 40); print-stack(x) end" 23) ;; 23 is the dummy value
+      (stack-test04 "let x = newstack() in begin stack-push(x, 10); stack-push(x, 20); stack-push(x,30); stack-pop(x) ; stack-pop(x) end" 20)
       
       (stack-test1 "let x = newstack() in begin stack-push(x, 10); stack-push(x, 20); stack-push(x,30); stack-size(x) end" 3)
       (stack-test2 "let x = newstack() in begin stack-push(x, 10); stack-push(x, 20); stack-pop(x); stack-pop(x); stack-push(x, 30); stack-top(x) end" 30)
@@ -204,10 +206,12 @@ in begin
 ;
 ;            ; ==================== Queue test cases =========================;
 
-      (queue-test00 "let x = newqueue() in begin queue-push(x, 10); queue-push(x, 20); queue-push(x,30); print-queue(x) end" 23)
+      ;; aditional test cases
+      (queue-test00 "let x = newqueue() in begin queue-push(x, 10); queue-push(x, 20); queue-push(x,30); print-queue(x) end" 23) ;; 23 is the dummy value
       (queue-test01 "let x = newqueue() in begin queue-push(x, 10); queue-push(x, 20); queue-push(x,30); queue-top(x) end" 10)
       (queue-test02 "let x = newqueue() in begin queue-push(x, 10); queue-push(x, 20); queue-push(x,30); queue-pop(x) ;queue-top(x) end" 20)
       (queue-test03 "let x = newqueue() in begin queue-push(x, 10); queue-push(x, 20); queue-push(x,30); queue-pop(x) ; queue-pop(x); queue-pop(x); empty-queue?(x) end" #t)
+      (queue-test01 "let x = newqueue() in begin queue-push(x, 10); queue-push(x, 20); queue-push(x,30); queue-pop(x) end" 10)
       
       (queue-test1 "let x = newqueue() in begin queue-push(x, 10); queue-push(x, 20); queue-push(x,30); queue-size(x) end" 3)
       (queue-test2 "let x = newqueue() in begin queue-push(x, 10); queue-push(x, 20); queue-push(x, 30); queue-pop(x); queue-pop(x); queue-top(x) end" 30)
