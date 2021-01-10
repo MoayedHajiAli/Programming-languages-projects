@@ -1,0 +1,21 @@
+(module top (lib "eopl.ss" "eopl")
+
+  (require (prefix-in interp- "top-interp.scm"))
+  
+  (provide interp-run run-all)
+
+  (define run-all
+    (lambda ()
+      (interp-run-all)))
+
+   ;;; interface for book test ;;;
+  (provide test-all)
+  (define (test-all) 
+    (run-all))
+
+  ;;; Run tests
+  (run-all)
+  
+)
+
+
