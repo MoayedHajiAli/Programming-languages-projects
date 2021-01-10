@@ -132,7 +132,6 @@ let fours = map(proc (v) -(v,1), fives) in car(fours)"
         "let subtracter = proc (x) proc (v) -(v,x) in
 let ans = map((subtracter 2), list(1, 2, 3)) in car(cdr(ans))"
         0)
-       
       ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
       
       ))

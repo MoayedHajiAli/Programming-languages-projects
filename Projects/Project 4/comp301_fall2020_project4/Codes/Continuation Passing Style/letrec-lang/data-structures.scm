@@ -115,13 +115,34 @@
     (null?-cont            
       (saved-cont continuation?))
     ; implement continuation datatype for your list expression
-    (list-cont     
-      (lst expval?)     
+    (list-cont         
       (exps list?)
       (saved-env environment?)
       (saved-cont continuation?))
-    ; implement continuation datatype(s) for your map expression
+
+    (list-saved-cont
+      (ent expval?)
+      (saved-cont continuation?)
+     )
     
+    ; implement continuation datatype(s) for your map expression
+
+    (map-cont0
+     (lst expression?)
+     (saved-env environment?)
+      (saved-cont continuation?))
+
+
+    (map-cont1
+     (proc expval?)
+     (saved-env environment?)
+      (saved-cont continuation?))
+
+    (map-cont2
+     (proc expval?)
+     (lst expval?)
+     (saved-env environment?)
+      (saved-cont continuation?))
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     )

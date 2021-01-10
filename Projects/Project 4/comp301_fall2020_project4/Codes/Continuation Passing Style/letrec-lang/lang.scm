@@ -79,12 +79,15 @@
       (expression
         ("list" "(" (separated-list expression ",") ")")
       list-exp)
+
       ; hint: use seperate-list function of scheme.
       
       ; implement map(expression, expression)
       ; the first expression should be treated as a proc expression with one parameter.
       ; the second expression should be treated as a list expression.
-      
+      (expression
+       ("map" "(" expression "," expression ")")
+       map-exp)
 
       ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
       ))

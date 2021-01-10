@@ -24,10 +24,6 @@
   ;; Page: 143--146, and 154
   (define value-of/k
     (lambda (exp env cont)
-      (display exp)
-      (display cont)
-      (newline)
-      (newline)
       (cases expression exp
         (const-exp (num) (apply-cont cont (num-val num)))
         (var-exp (var) (apply-cont cont (apply-env env var)))
@@ -74,10 +70,13 @@
         )
         ; Implement your list expression case here
         (list-exp (exps)
-          (value-of/k (car exps) env (list-cont (emptylist-val) (cdr exps) env cont))
+          (value-of/k (car exps) env (list-cont (cdr exps) env cont))
         )
         ; Implement the map expression case here        
-        
+        (map-exp (proc exp)
+          (value-of/k proc env (map-cont0 exp env cont))
+          ;(value-of/k (expval->car exp) env (map-cont proc (expval->cdr exp) env cont))
+        )
         ;;;;;;;;;;;;;;;;;;;;;;
    )))
 
@@ -133,22 +132,33 @@
         )
         ; implement continuation for list-exp here.
         ; hint: you will need to call value-of/k recursively, by passing this continuation as cont to value-of/k.
-        (list-cont (lst exp saved-env saved-cont)
-          (display lst)
-          (display val)
-          (display saved-cont)
-          (newline)
-          (newline)
+        (list-saved-cont (ent saved-cont)
+            (apply-cont saved-cont (pair-val ent val)))
+
+        (list-cont (exps saved-env saved-cont)
           (if (null? exps) 
-                (apply-cont saved-cont (pair-val val emptylist-val))
-                (value-of/k (list-exp (car exps)) saved-env (list-cont (pair-val val lst) (car exps) saved-env saved-cont))))
+                (apply-cont saved-cont (pair-val val (emptylist-val)))
+                (value-of/k (list-exp exps) saved-env (list-saved-cont val saved-cont))))
         ; implement map-exp continuation(s) here. you will notice that one continuation will not be enough.
-        
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+        ;; val (to be proc-val) x list-exp -> find value of list-exp and delegate to map-cont1
+        (map-cont0 (lst saved-env saved-cont)
+                (value-of/k lst saved-env (map-cont1 val saved-env saved-cont)))
+
+        ;; val (to be list) x  proc-val x saved-env x saved-cont -> apply proc to car of list, and delegate to map-cont2 which handles the list (eventually it should pass list of vals to saved cont)
+        (map-cont1 (proc saved-env saved-cont)
+                (apply-procedure/k (expval->proc proc) (expval->car val) (map-cont2 proc (expval->cdr val) saved-env saved-cont)))
         
+        ;; val(of expval after applying proc) x proc x list(remaining) x saved-env x saved-cont -> construct the list by recursivly calling map-cont1
+        (map-cont2 (proc lst saved-env saved-cont)
+                (if (expval->null? lst)
+                (apply-cont saved-cont (pair-val val (emptylist-val)))
+                (apply-cont (map-cont1 proc saved-env  (list-saved-cont val saved-cont)) lst))
+        )        
         )))
 
-  (display (value-of/k (cdr-exp (list-exp (list (const-exp 1) (const-exp 2) (const-exp 3)))) (init-env) (end-cont)))
+  ;(display (value-of/k (map-exp (proc-exp (var-exp 'x) (var-exp 'x)) (list-exp (list (const-exp 1) (const-exp 2) (const-exp 3)))) (init-env) (end-cont)))
   ;; apply-procedure/k : Proc * ExpVal * Cont -> FinalAnswer
   ;; Page 152 and 155
   (define apply-procedure/k
