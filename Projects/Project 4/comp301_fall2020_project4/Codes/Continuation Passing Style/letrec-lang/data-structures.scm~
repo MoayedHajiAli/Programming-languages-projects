@@ -117,7 +117,7 @@
     ; implement continuation datatype for your list expression
     (list-cont     
       (lst expval?)     
-      (exps list?)
+      (exps (list-of expval?))
       (saved-env environment?)
       (saved-cont continuation?))
     ; implement continuation datatype(s) for your map expression

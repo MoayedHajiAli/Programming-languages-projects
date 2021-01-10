@@ -58,26 +58,25 @@
       ;;;;;;;; TASK 4: LISTS ;;;;;;;
       ; implement car(expression)      
       (expression
-        ("car" "(" expression ")")
+        ("car" expression)
       car-exp)
       ; implement cdr(expression)      
       (expression
-        ("cdr" "(" expression ")")
-      cdr-exp)
+        ("car" expression)
+      car-exp)
 
       ; implement null?(expression)      
       
       (expression
-        ("null?" "(" expression ")")
-      null?-exp)
+        ("car" expression)
+      car-exp)
       ; implement emptylist      
       (expression
-       ("emptylist")
       emptylist-exp)
 
       ; implement list(exp1, exp2, ..., expN)
       (expression
-        ("list" "(" (separated-list expression ",") ")")
+        (seperated-list expression ",")
       list-exp)
       ; hint: use seperate-list function of scheme.
       
