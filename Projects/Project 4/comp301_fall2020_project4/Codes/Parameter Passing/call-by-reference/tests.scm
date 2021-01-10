@@ -33,14 +33,14 @@
       ;; Write the expression that evaluates different for:
 
       ;; - Call-by-reference and Call-by-need here
-      (refrence-name "
+      (test1 "
       let y = 3 in
       let f = proc(x) begin set y = 6; x end in
       (f -(y, 3))
       " 0)
       
       ;; - Call-by-reference and Call-by-name here
-      (refrence-name "
+      (test2 "
       let y = 3 in
       let f = proc(x) begin set y = 6; x end in
       (f -(y, 3))

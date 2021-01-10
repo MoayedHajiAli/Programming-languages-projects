@@ -44,9 +44,19 @@
       ;; Write the expression that evaluates different for:
 
       ;; - Call-by-value and Call-by-need here
+      (test1 "
+      let y = 3 in
+      let f = proc(x) begin set y = 6; x end in
+      (f -(y, 3))
+      " 0)
 
       ;; - Call-by-value and Call-by-name here
-      
+      (test2 "
+      let y = 3 in
+      let f = proc(x) begin set y = 6; x end in
+      (f -(y, 3))
+      " 0)
+
       ;; ======================= PARAMETER PASSING - TASK 3 ========================
     )
   )

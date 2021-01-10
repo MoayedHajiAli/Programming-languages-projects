@@ -35,13 +35,18 @@
 
       ;; --- Call-by-reference and Call-by-name here
 
-      (refrence-name "
+      (test1 "
       let y = 3 in
       let f = proc(x) begin set y = 6; x end in
       (f -(y, 3))
       " 3)
 
       ;; --- Call-by-value and Call-by-name here
+      (test2 "
+      let y = 3 in
+      let f = proc(x) begin set y = 6; x end in
+      (f -(y, 3))
+      " 3)
 
       ;; ======================= PARAMETER PASSING - TASK 3 ========================
     )
